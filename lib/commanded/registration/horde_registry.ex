@@ -30,33 +30,49 @@ defmodule Commanded.Registration.HordeRegistry do
     via_name = via_tuple(name)
     updated_args = Keyword.put(args, :name, via_name)
 
-    case Horde.Supervisor.start_child(supervisor, {module, updated_args}) do
-      {:error, {:already_started, nil}} -> {:ok, whereis_name(name)}
-      {:error, {:already_started, pid}} when is_pid(pid) -> {:ok, pid}
-      {:ok, nil} -> {:ok, whereis_name(name)}
-      reply -> reply
-    end
+    fun = fn ->
+      spec = Supervisor.child_spec({module, updated_args}, id: {module, name})
+      Horde.Supervisor.start_child(supervisor, spec) end
+    start(name, fun)
   end
 
   @impl Commanded.Registration
   def start_link(name, supervisor, args) do
     via_name = via_tuple(name)
 
-    case GenServer.start_link(supervisor, args, name: via_name) do
-      {:error, {:already_started, nil}} -> {:ok, whereis_name(name)}
-      {:error, {:already_started, pid}} when is_pid(pid) -> {:ok, pid}
-      {:ok, nil} -> {:ok, whereis_name(name)}
-      reply -> reply
-    end
+    fun = fn -> GenServer.start_link(supervisor, args, name: via_name) end
+    start(name, fun)
   end
 
   @impl Commanded.Registration
   def whereis_name(name) do
-    Horde.Registry.whereis_name({__MODULE__, name})
+    case Horde.Registry.whereis_name({__MODULE__, name}) do
+      pid when is_pid(pid) -> pid
+      :undefined -> :undefined
+    end
   end
 
   @impl Commanded.Registration
   def via_tuple(name) do
     {:via, Horde.Registry, {__MODULE__, name}}
+  end
+
+  defp start(name, func) do
+    case func.() do
+      {:error, {:already_started, nil}} ->
+        case whereis_name(name) do
+          pid when is_pid(pid) -> {:ok, pid}
+          _other -> {:error, :registered_but_dead}
+        end
+
+      {:error, {:already_started, pid}} when is_pid(pid) ->
+        {:ok, pid}
+
+      {:ok, nil} ->
+        {:error, :received_ok_nil}
+
+      reply ->
+        reply
+    end
   end
 end
