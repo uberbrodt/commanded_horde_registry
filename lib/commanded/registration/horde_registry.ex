@@ -32,7 +32,11 @@ defmodule Commanded.Registration.HordeRegistry do
       distribution_strategy: Horde.UniformDistribution,
       name: module
     ]
-    opts = Keyword.merge(defaults, Application.get_env(:commanded_horde_registry, :supervisor_opts))
+    overrides = Application.get_env(:commanded_horde_registry, :supervisor_opts, [])
+
+
+    opts = Keyword.merge(defaults, overrides)
+
     Horde.Supervisor.child_spec(opts)
   end
 
@@ -43,7 +47,9 @@ defmodule Commanded.Registration.HordeRegistry do
 
     fun = fn ->
       spec = Supervisor.child_spec({module, updated_args}, id: {module, name})
-      Horde.Supervisor.start_child(supervisor, spec) end
+      Horde.Supervisor.start_child(supervisor, spec)
+    end
+
     start(name, fun)
   end
 
