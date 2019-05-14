@@ -26,6 +26,17 @@ defmodule Commanded.Registration.HordeRegistry do
   end
 
   @impl Commanded.Registration
+  def supervisor_child_spec(module, _args) do
+    defaults = [
+      strategy: :one_for_one,
+      distribution_strategy: Horde.UniformDistribution,
+      name: module
+    ]
+    opts = Keyword.merge(defaults, Application.get_env(:commanded_horde_registry, :supervisor_opts))
+    Horde.Supervisor.child_spec(opts)
+  end
+
+  @impl Commanded.Registration
   def start_child(name, supervisor, {module, args}) do
     via_name = via_tuple(name)
     updated_args = Keyword.put(args, :name, via_name)

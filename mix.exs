@@ -57,7 +57,7 @@ defmodule Commanded.Registration.HordeRegistry.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:commanded, git: "https://github.com/uberbrodt/commanded", tag: "aggregate_sup_adapter", runtime: Mix.env() == :test},
+      {:commanded, git: "https://github.com/uberbrodt/commanded", tag: "registration_supervisor_child_spec", runtime: Mix.env() == :test},
       {:jason, "~> 1.1"},
       {:ex_doc, "~> 0.19", only: :dev},
       {:horde, "~> 0.5.0"},
