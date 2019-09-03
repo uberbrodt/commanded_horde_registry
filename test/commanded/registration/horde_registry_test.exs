@@ -7,16 +7,16 @@ defmodule Commanded.Registration.HordeRegistryTest do
   alias Commanded.HordeRegistry.ExampleSupervisor
   alias Commanded.Registration.RegisteredServer
 
-
   setup_all do
     nodes = LocalCluster.start_nodes("my-cluster", 3)
+
     for node <- [Node.self() | nodes] do
       assert Node.ping(node) == :pong
       Commanded.HordeRegistry.NodeSetup.setup_node(node)
     end
+
     :ok
   end
-
 
   describe "`start_child/3`" do
     setup do

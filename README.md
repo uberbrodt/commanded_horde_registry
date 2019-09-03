@@ -18,6 +18,41 @@
   in your supervision tree will accomplish this, and has the added benefit of continually checking
   the cluster for new members and joining them.
 
+
+## Example Usage
+To correctly handle dynamic cluster membership or node down events, you will
+need to start a `Commanded.Registration.HordeRegistry.Linker` process per a
+`Horde.Supervisor` or `Horde.Registry`.
+
+```elixir
+
+defmodule ExampleCommandedApp.EventHandlerSupervisor do
+  use Horde.Supervisor
+  
+  def init(_) do
+    cluster_members = Commanded.Registration.HordeRegistry.get_cluster_members(__MODULE__)
+    opts = [members: cluster_members, distribution_strategy: Horde.UniformDistribution]
+    {:ok, opts}
+  end
+end
+
+
+defmodule ExampleCommandedApp do
+
+  use Application
+
+  def start(_, _) do
+    children = [
+      {Commanded.Registration.HordeRegistry.Linker, [horde_name: Commanded.Registration.HordeRegistry]},
+      ExampleCommandedApp.EventHandlerSupervisor,
+      {Commanded.Registration.HordeRegistry.Linker, [horde_name: ExampleCommandedApp.EventHandlerSupervisor]},
+    ]
+  end
+
+end
+```
+
+
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
@@ -26,7 +61,7 @@ by adding `commanded_horde_registry` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:commanded_horde_registry, "~> 0.1.0"}
+    {:commanded_horde_registry, "~> 0.4.0"}
   ]
 end
 ```
@@ -38,13 +73,6 @@ be found at [https://hexdocs.pm/commanded_horde_registry](https://hexdocs.pm/com
 
 ## Development Status
 
-Currently we have everything we need in Commanded after
-[this](https://github.com/commanded/commanded/pull/277) and
-[this](https://github.com/commanded/commanded/pull/273) were accepted. Currently
-(2019-05-21) those patches are not released, however the master branch seems
-stable at the moment.
+Commanded and Horde have released updates so this is ready for testing. Once I'm
+confident it works I'll push a 1.0 release
 
-I'm also working with Horde an issue I identified
-[here](https://github.com/derekkraan/horde/issues/116). Once this is resolved, I
-will work towards a release candidate. A 1.0 release will likely wait until
-Commanded v0.19 is released.

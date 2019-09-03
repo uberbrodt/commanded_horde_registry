@@ -7,7 +7,6 @@ defmodule Commanded.HordeRegistry.NodeSetup do
     rpc(node, Commanded.HordeRegistry.ExampleSupervisor, :start_link, [args])
   end
 
-
   def rpc(node, module, fun, args) do
     :rpc.block_call(node, module, fun, args)
   end

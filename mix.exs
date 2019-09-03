@@ -7,7 +7,7 @@ defmodule Commanded.Registration.HordeRegistry.MixProject do
       aliases: [
         test: "test --no-start"
       ],
-      version: "0.3.0",
+      version: "0.4.0",
       elixir: "~> 1.8",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -60,7 +60,7 @@ defmodule Commanded.Registration.HordeRegistry.MixProject do
       {:commanded, "~> 0.19.0"},
       {:jason, "~> 1.1"},
       {:ex_doc, "~> 0.19", only: :dev},
-      {:horde, "~> 0.5.0"},
+      {:horde, "~> 0.6.0"},
       {:local_cluster, "~> 1.0", only: [:test]},
       {:mox, "~> 0.5", only: :test}
     ]

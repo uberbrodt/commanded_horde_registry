@@ -1,4 +1,6 @@
 defmodule Commanded.Registration.HordeRegistry do
+  import Commanded.Registration.HordeRegistry.Util
+
   @moduledoc """
   Process registration and distribution via [Horde](https://github.com/derekkraan/horde)
 
@@ -30,11 +32,11 @@ defmodule Commanded.Registration.HordeRegistry do
     defaults = [
       strategy: :one_for_one,
       distribution_strategy: Horde.UniformDistribution,
-      name: module
+      name: module,
+      members: get_cluster_members(module)
     ]
+
     overrides = Application.get_env(:commanded_horde_registry, :supervisor_opts, [])
-
-
     opts = Keyword.merge(defaults, overrides)
 
     Horde.Supervisor.child_spec(opts)
