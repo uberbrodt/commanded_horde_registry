@@ -48,7 +48,7 @@ defmodule Commanded.Registration.HordeRegistry.Linker do
 
   @impl GenServer
   def handle_info(:heartbeat, %{sync_interval: si, horde_name: name} = state) do
-    Process.send_after(self(), :connect_hordes, si)
+    Process.send_after(self(), :heartbeat, si)
     horde_members = Horde.Cluster.members(name) |> untag() |> Enum.sort()
     cluster_members = get_cluster_members(name) |> Enum.sort()
 
