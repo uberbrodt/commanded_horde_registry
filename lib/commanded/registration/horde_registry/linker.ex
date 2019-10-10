@@ -26,7 +26,7 @@ defmodule Commanded.Registration.HordeRegistry.Linker do
     sync_interval = Keyword.get(args, :sync_interval, @default_sync_interval)
     name = Keyword.get(args, :horde_name, Commanded.Registration.HordeRegistry)
 
-    Process.send_after(self(), :sync_interval, sync_interval)
+    Process.send_after(self(), :heartbeat, sync_interval)
     :net_kernel.monitor_nodes(true, node_type: :visible)
 
     {:ok, %{sync_interval: sync_interval, horde_name: name}}
