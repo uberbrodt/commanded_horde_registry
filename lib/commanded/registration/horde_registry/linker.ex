@@ -26,7 +26,7 @@ defmodule Commanded.Registration.HordeRegistry.Linker do
     sync_interval = Keyword.get(args, :sync_interval, @default_sync_interval)
     name = Keyword.get(args, :horde_name, Commanded.Registration.HordeRegistry)
 
-    Process.send_after(self(), :sync_interval, sync_interval)
+    Process.send_after(self(), :heartbeat, sync_interval)
     :net_kernel.monitor_nodes(true, node_type: :visible)
 
     {:ok, %{sync_interval: sync_interval, horde_name: name}}
@@ -48,7 +48,7 @@ defmodule Commanded.Registration.HordeRegistry.Linker do
 
   @impl GenServer
   def handle_info(:heartbeat, %{sync_interval: si, horde_name: name} = state) do
-    Process.send_after(self(), :connect_hordes, si)
+    Process.send_after(self(), :heartbeat, si)
     horde_members = Horde.Cluster.members(name) |> untag() |> Enum.sort()
     cluster_members = get_cluster_members(name) |> Enum.sort()
 
