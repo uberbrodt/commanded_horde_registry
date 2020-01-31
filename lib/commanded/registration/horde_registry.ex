@@ -1,5 +1,6 @@
 defmodule Commanded.Registration.HordeRegistry do
   import Commanded.Registration.HordeRegistry.Util
+  require Logger
 
   @moduledoc """
   Process registration and distribution via [Horde](https://github.com/derekkraan/horde)
@@ -39,7 +40,7 @@ defmodule Commanded.Registration.HordeRegistry do
     overrides = Application.get_env(:commanded_horde_registry, :supervisor_opts, [])
     opts = Keyword.merge(defaults, overrides)
 
-    Horde.Supervisor.child_spec(opts)
+    Horde.DynamicSupervisor.child_spec(opts)
   end
 
   @impl Commanded.Registration
@@ -49,7 +50,7 @@ defmodule Commanded.Registration.HordeRegistry do
 
     fun = fn ->
       spec = Supervisor.child_spec({module, updated_args}, id: {module, name})
-      Horde.Supervisor.start_child(supervisor, spec)
+      Horde.DynamicSupervisor.start_child(supervisor, spec)
     end
 
     start(name, fun)
@@ -66,8 +67,15 @@ defmodule Commanded.Registration.HordeRegistry do
   @impl Commanded.Registration
   def whereis_name(name) do
     case Horde.Registry.whereis_name({__MODULE__, name}) do
-      pid when is_pid(pid) -> pid
-      :undefined -> :undefined
+      pid when is_pid(pid) ->
+        pid
+
+      :undefined ->
+        :undefined
+
+      other ->
+        Logger.warn("unexpected response from Horde.Registry.whereis_name/1: #{inspect(other)}")
+        :undefined
     end
   end
 

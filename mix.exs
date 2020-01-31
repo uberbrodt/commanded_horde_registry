@@ -60,7 +60,7 @@ defmodule Commanded.Registration.HordeRegistry.MixProject do
       {:commanded, "~> 0.19.0"},
       {:jason, "~> 1.1"},
       {:ex_doc, "~> 0.19", only: :dev},
-      {:horde, "~> 0.6.0"},
+      {:horde, "~> 0.7.0"},
       {:local_cluster, "~> 1.0", only: [:test]},
       {:mox, "~> 0.5", only: :test}
     ]
