@@ -18,7 +18,7 @@ defmodule Commanded.HordeRegistry.ExampleSupervisor do
     []
   end
 
-  def start_child(name) do
-    Registration.start_child(name, __MODULE__, {SupervisedServer, []})
+  def start_child(adapter_meta, name) do
+    Registration.start_child(adapter_meta, name, __MODULE__, {SupervisedServer, []})
   end
 end

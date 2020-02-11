@@ -3,6 +3,7 @@ defmodule Commanded.HordeRegistry.NodeSetup do
 
   def setup_node(node) do
     rpc(node, Application, :ensure_all_started, [:commanded])
+    rpc(node, Commanded.HordeRegistry.DefaultApp, :start_link, [[]])
     args = [name: Commanded.HordeRegistry.ExampleSupervisor, strategy: :one_for_one]
     rpc(node, Commanded.HordeRegistry.ExampleSupervisor, :start_link, [args])
   end
