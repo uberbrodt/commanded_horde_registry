@@ -21,15 +21,16 @@ defmodule Commanded.Registration.HordeRegistry do
   the cluster for new members and joining them.
   """
 
-  @behaviour Commanded.Registration
+  @behaviour Commanded.Registration.Adapter
 
-  @impl Commanded.Registration
-  def child_spec do
-    [Horde.Registry.child_spec(name: __MODULE__, keys: :unique)]
+  @impl Commanded.Registration.Adapter
+  def child_spec(application, _config) do
+    name = Module.concat([application, HordeRegistry])
+    {:ok, [Horde.Registry.child_spec(name: name, keys: :unique)], %{registry_name: name}}
   end
 
-  @impl Commanded.Registration
-  def supervisor_child_spec(module, _args) do
+  @impl Commanded.Registration.Adapter
+  def supervisor_child_spec(_adapter_meta, module, _args) do
     defaults = [
       strategy: :one_for_one,
       distribution_strategy: Horde.UniformDistribution,
@@ -43,9 +44,9 @@ defmodule Commanded.Registration.HordeRegistry do
     Horde.DynamicSupervisor.child_spec(opts)
   end
 
-  @impl Commanded.Registration
-  def start_child(name, supervisor, {module, args}) do
-    via_name = via_tuple(name)
+  @impl Commanded.Registration.Adapter
+  def start_child(adapter_meta, name, supervisor, {module, args}) do
+    via_name = via_tuple(adapter_meta, name)
     updated_args = Keyword.put(args, :name, via_name)
 
     fun = fn ->
@@ -53,20 +54,22 @@ defmodule Commanded.Registration.HordeRegistry do
       Horde.DynamicSupervisor.start_child(supervisor, spec)
     end
 
-    start(name, fun)
+    start(adapter_meta, name, fun)
   end
 
-  @impl Commanded.Registration
-  def start_link(name, supervisor, args) do
-    via_name = via_tuple(name)
+  @impl Commanded.Registration.Adapter
+  def start_link(adapter_meta, name, supervisor, args) do
+    via_name = via_tuple(adapter_meta, name)
 
     fun = fn -> GenServer.start_link(supervisor, args, name: via_name) end
-    start(name, fun)
+    start(adapter_meta, name, fun)
   end
 
-  @impl Commanded.Registration
-  def whereis_name(name) do
-    case Horde.Registry.whereis_name({__MODULE__, name}) do
+  @impl Commanded.Registration.Adapter
+  def whereis_name(adapter_meta, name) do
+    registry_name = registry_name(adapter_meta)
+
+    case Horde.Registry.whereis_name({registry_name, name}) do
       pid when is_pid(pid) ->
         pid
 
@@ -79,15 +82,16 @@ defmodule Commanded.Registration.HordeRegistry do
     end
   end
 
-  @impl Commanded.Registration
-  def via_tuple(name) do
-    {:via, Horde.Registry, {__MODULE__, name}}
+  @impl Commanded.Registration.Adapter
+  def via_tuple(adapter_meta, name) do
+    registry_name = registry_name(adapter_meta)
+    {:via, Horde.Registry, {registry_name, name}}
   end
 
-  defp start(name, func) do
+  defp start(adapter_meta, name, func) do
     case func.() do
       {:error, {:already_started, nil}} ->
-        case whereis_name(name) do
+        case whereis_name(adapter_meta, name) do
           pid when is_pid(pid) -> {:ok, pid}
           _other -> {:error, :registered_but_dead}
         end
@@ -102,4 +106,6 @@ defmodule Commanded.Registration.HordeRegistry do
         reply
     end
   end
+
+  defp registry_name(adapter_meta), do: Map.get(adapter_meta, :registry_name)
 end
