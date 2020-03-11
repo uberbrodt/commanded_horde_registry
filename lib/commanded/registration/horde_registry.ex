@@ -51,7 +51,7 @@ defmodule Commanded.Registration.HordeRegistry do
 
     fun = fn ->
       spec = Supervisor.child_spec({module, updated_args}, id: {module, name})
-      Horde.DynamicSupervisor.start_child(supervisor, spec)
+      DynamicSupervisor.start_child(supervisor, spec)
     end
 
     start(adapter_meta, name, fun)
