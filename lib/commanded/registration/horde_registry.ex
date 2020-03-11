@@ -1,5 +1,6 @@
 defmodule Commanded.Registration.HordeRegistry do
   import Commanded.Registration.HordeRegistry.Util
+  alias Commanded.Registration.HordeRegistry.NodeListener
   require Logger
 
   @moduledoc """
@@ -9,16 +10,8 @@ defmodule Commanded.Registration.HordeRegistry do
 
   ```
   config :commanded,
-    registry: Commanded.Registration.HordeRegistry,
-    aggregate_supervisor_mfa:
-      {Horde.Supervisor, :start_link,
-       [[name: Commanded.Aggregates.Supervisor, strategy: :one_for_one]]}
+    registry: Commanded.Registration.HordeRegistry
   ```
-
-  You will also need to join the Supervisors together (connecting them via Distributed Erlang is not
-  enough) via `Horde.Cluster` as documented. Starting a `Commanded.Registration.HordeRegistry.Linker`
-  in your supervision tree will accomplish this, and has the added benefit of continually checking
-  the cluster for new members and joining them.
   """
 
   @behaviour Commanded.Registration.Adapter
@@ -26,7 +19,14 @@ defmodule Commanded.Registration.HordeRegistry do
   @impl Commanded.Registration.Adapter
   def child_spec(application, _config) do
     name = Module.concat([application, HordeRegistry])
-    {:ok, [Horde.Registry.child_spec(name: name, keys: :unique)], %{registry_name: name}}
+    node_listener_name = Module.concat([application, HordeRegistryNodeListener])
+    members = get_cluster_members(name)
+
+    {:ok,
+     [
+       Horde.Registry.child_spec(name: name, keys: :unique, members: members),
+       {NodeListener, [name: node_listener_name]}
+     ], %{registry_name: name}}
   end
 
   @impl Commanded.Registration.Adapter
