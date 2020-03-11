@@ -50,8 +50,8 @@ defmodule Commanded.Registration.HordeRegistry do
     updated_args = Keyword.put(args, :name, via_name)
 
     fun = fn ->
-      spec = Supervisor.child_spec({module, updated_args}, id: {module, name})
-      Horde.DynamicSupervisor.start_child(supervisor, spec)
+      # spec = Supervisor.child_spec({module, updated_args}, id: {module, name})
+      DynamicSupervisor.start_child(supervisor, {module, updated_args})
     end
 
     start(adapter_meta, name, fun)
@@ -98,9 +98,6 @@ defmodule Commanded.Registration.HordeRegistry do
 
       {:error, {:already_started, pid}} when is_pid(pid) ->
         {:ok, pid}
-
-      {:ok, nil} ->
-        {:error, :received_ok_nil}
 
       reply ->
         reply
