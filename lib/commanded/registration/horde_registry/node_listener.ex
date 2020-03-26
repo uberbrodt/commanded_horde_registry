@@ -14,7 +14,11 @@ defmodule Commanded.Registration.HordeRegistry.NodeListener do
   def init(opts) do
     :net_kernel.monitor_nodes(true, node_type: :visible)
     hordes = opts[:hordes]
-    {:ok, hordes}
+
+    case hordes do
+      x when is_list(x) -> {:ok, hordes}
+      _ -> {:stop, ":hordes must be a list"}
+    end
   end
 
   @impl GenServer

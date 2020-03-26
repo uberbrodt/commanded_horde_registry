@@ -25,7 +25,7 @@ defmodule Commanded.Registration.HordeRegistry do
     {:ok,
      [
        Horde.Registry.child_spec(name: name, keys: :unique, members: members),
-       {NodeListener, [name: node_listener_name]}
+       {NodeListener, [name: node_listener_name, hordes: [name]]}
      ], %{registry_name: name}}
   end
 
