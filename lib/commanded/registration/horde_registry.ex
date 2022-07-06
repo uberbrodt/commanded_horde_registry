@@ -58,10 +58,11 @@ defmodule Commanded.Registration.HordeRegistry do
   end
 
   @impl Commanded.Registration.Adapter
-  def start_link(adapter_meta, name, supervisor, args) do
+  def start_link(adapter_meta, name, supervisor, args, start_opts) do
     via_name = via_tuple(adapter_meta, name)
+    start_opts = Keyword.put(start_opts, :name, via_name)
 
-    fun = fn -> GenServer.start_link(supervisor, args, name: via_name) end
+    fun = fn -> GenServer.start_link(supervisor, args, start_opts) end
     start(adapter_meta, name, fun)
   end
 
