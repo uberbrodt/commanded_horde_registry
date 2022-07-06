@@ -89,6 +89,6 @@ defmodule Commanded.Registration.HordeRegistryTest do
   end
 
   defp start_link(app, name) do
-    Registration.start_link(app, name, RegisteredServer, [name])
+    Registration.start_link(app, name, RegisteredServer, [], name: name)
   end
 end
