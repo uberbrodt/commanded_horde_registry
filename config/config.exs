@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :commanded_horde_registry, :supervisor_opts, []
 

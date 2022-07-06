@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :commanded,
   assert_receive_event_timeout: 2_000,
