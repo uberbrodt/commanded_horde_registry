@@ -4,11 +4,8 @@ defmodule Commanded.Registration.HordeRegistry.MixProject do
   def project do
     [
       app: :commanded_horde_registry,
-      aliases: [
-        test: "test --no-start"
-      ],
-      version: "1.0.0-alpha.1",
-      elixir: "~> 1.8",
+      version: "1.0.0-rc.1",
+      elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -57,12 +54,12 @@ defmodule Commanded.Registration.HordeRegistry.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:commanded, "~> 1.0.0"},
+      {:commanded, "~> 1.4"},
       {:jason, "~> 1.1"},
       {:ex_doc, "~> 0.19", only: :dev},
-      {:horde, "~> 0.7.0"},
-      {:local_cluster, "~> 1.0", only: [:test]},
-      {:mox, "~> 0.5", only: :test}
+      {:horde, "~> 0.9"},
+      {:local_cluster, "~> 2.0", only: [:test]},
+      {:mox, "~> 1.0", only: :test}
     ]
   end
 end

@@ -26,7 +26,7 @@ be found at [https://hexdocs.pm/commanded_horde_registry](https://hexdocs.pm/com
 
 ## Development Status
 
-I've updated to Horde 0.7 and now am targeting Commanded 1.0. One thing to note
+I've updated to Horde 0.10 and now am targeting Commanded 1.4. One thing to note
 is that we are only providing a distributed process registry. The
 `Commanded.Aggregate.Supervisor` will still be a basic DynamicSupervisor and
 aggregates will not be restarted in the event of a node exit.

@@ -9,7 +9,8 @@ defmodule Commanded.Registration.HordeRegistryTest do
   alias Commanded.HordeRegistry.DefaultApp
 
   setup_all do
-    nodes = LocalCluster.start_nodes("my-cluster", 3)
+    {:ok, cluster} = LocalCluster.start_link(3, name: :my_cluster)
+    {:ok, nodes} = LocalCluster.nodes(cluster)
 
     for node <- [Node.self() | nodes] do
       assert Node.ping(node) == :pong
@@ -89,6 +90,6 @@ defmodule Commanded.Registration.HordeRegistryTest do
   end
 
   defp start_link(app, name) do
-    Registration.start_link(app, name, RegisteredServer, [name])
+    Registration.start_link(app, name, RegisteredServer, [name], [])
   end
 end

@@ -7,7 +7,7 @@ defmodule Commanded.HordeRegistry.SupervisedServer do
   end
 
   def start_link(application, _args) do
-    Registration.start_link(application, "supervisedchild", __MODULE__, [])
+    Registration.start_link(application, "supervisedchild", __MODULE__, [], [])
   end
 
   def init(state), do: {:ok, state}

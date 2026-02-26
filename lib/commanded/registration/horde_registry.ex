@@ -58,10 +58,11 @@ defmodule Commanded.Registration.HordeRegistry do
   end
 
   @impl Commanded.Registration.Adapter
-  def start_link(adapter_meta, name, supervisor, args) do
+  def start_link(adapter_meta, name, module, args, start_options) do
     via_name = via_tuple(adapter_meta, name)
+    start_options = Keyword.put(start_options, :name, via_name)
 
-    fun = fn -> GenServer.start_link(supervisor, args, name: via_name) end
+    fun = fn -> GenServer.start_link(module, args, start_options) end
     start(adapter_meta, name, fun)
   end
 
@@ -77,7 +78,10 @@ defmodule Commanded.Registration.HordeRegistry do
         :undefined
 
       other ->
-        Logger.warn("unexpected response from Horde.Registry.whereis_name/1: #{inspect(other)}")
+        Logger.warning(
+          "unexpected response from Horde.Registry.whereis_name/1: #{inspect(other)}"
+        )
+
         :undefined
     end
   end

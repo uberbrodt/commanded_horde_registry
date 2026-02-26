@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :commanded,
   assert_receive_event_timeout: 2_000,
@@ -12,3 +12,6 @@ config :ex_unit,
   capture_log: true,
   assert_receive_timeout: 5_000,
   refute_receive_timeout: 2_000
+
+config :logger,
+  level: :warning
