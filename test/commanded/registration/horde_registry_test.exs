@@ -41,6 +41,44 @@ defmodule Commanded.Registration.HordeRegistryTest do
       assert {:ok, pid} = ExampleSupervisor.start_child(app, "child")
       assert {:ok, ^pid} = ExampleSupervisor.start_child(app, "child")
     end
+
+    test "should return existing child while another child blocks supervisor startup", %{
+      application: app
+    } do
+      assert {:ok, owner} = ExampleSupervisor.start_child(app, "child")
+      Wait.until(fn -> assert Registration.whereis_name(app, "child") == owner end)
+      test_pid = self()
+
+      blocked_start =
+        Task.async(fn ->
+          DynamicSupervisor.start_child(
+            ExampleSupervisor,
+            {Agent,
+             fn ->
+               monitor = Process.monitor(test_pid)
+               send(test_pid, {:initializing, self()})
+
+               receive do
+                 :continue -> Process.demonitor(monitor, [:flush])
+                 {:DOWN, ^monitor, :process, ^test_pid, _reason} -> :ok
+               end
+             end}
+          )
+        end)
+
+      assert_receive {:initializing, blocked_child}, 1_000
+
+      try do
+        lookup = Task.async(fn -> ExampleSupervisor.start_child(app, "child") end)
+
+        assert {:ok, {:ok, ^owner}} =
+                 Task.yield(lookup, 1_000) || Task.shutdown(lookup, :brutal_kill)
+      after
+        send(blocked_child, :continue)
+        {:ok, child} = Task.await(blocked_start)
+        DynamicSupervisor.terminate_child(ExampleSupervisor, child)
+      end
+    end
   end
 
   describe "`start_link/3`" do
