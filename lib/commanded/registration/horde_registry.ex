@@ -50,8 +50,10 @@ defmodule Commanded.Registration.HordeRegistry do
     updated_args = Keyword.put(args, :name, via_name)
 
     fun = fn ->
-      # spec = Supervisor.child_spec({module, updated_args}, id: {module, name})
-      DynamicSupervisor.start_child(supervisor, {module, updated_args})
+      case whereis_name(adapter_meta, name) do
+        pid when is_pid(pid) -> {:ok, pid}
+        :undefined -> DynamicSupervisor.start_child(supervisor, {module, updated_args})
+      end
     end
 
     start(adapter_meta, name, fun)
